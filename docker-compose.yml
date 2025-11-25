@@ -38,8 +38,14 @@ services:
     restart: always
     volumes:
       - pgdata:/var/lib/postgresql/data
+    # запускаем postgres без Unix-сокетов, только TCP
+    command: ["postgres",
+              "-c", "unix_socket_directories=",
+              "-c", "listen_addresses=*"]
+
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U aperiuser -d aperisolve"]
+      # проверяем просто, жив ли сервер, по TCP
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 5
